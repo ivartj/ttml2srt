@@ -1,8 +1,9 @@
 ttml2srt - Timed Text Markup Language to SubRip converter
 
-I maintain this in order to obtain subtitles in an omxplayer-compatible
-format from NRK Nett-TV (tv.nrk.no). For now it is just a quick hack
-that has not been extensively tested.
+Description:
+  I maintain this in order to obtain subtitles in an
+  omxplayer-compatible format from NRK Nett-TV (tv.nrk.no). For now it
+  is just a quick hack that has not been extensively tested.
 
 Installation:
   autoreconf --install
@@ -16,3 +17,11 @@ Options:
   -h, --help             Prints help message
   --version              Prints version
   -o, --output=FILENAME  Specifies output file
+
+TODO:
+
+ * Add option for output character encoding.
+   mplayer presumes WINDOWS-1252 unless given -utf8 option,
+   omxplayer takes only UTF-8.
+
+ * grep TODO *.c *.h
