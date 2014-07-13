@@ -1,6 +1,6 @@
 ttml2srt - Timed Text Markup Language to SubRip converter
 
-I maintain this in order to obtain subtitles in an mplayer-compatible
+I maintain this in order to obtain subtitles in an omxplayer-compatible
 format from NRK Nett-TV (tv.nrk.no). For now it is just a quick hack
 that has not been extensively tested.
 
