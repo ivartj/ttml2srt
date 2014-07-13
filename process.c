@@ -22,6 +22,7 @@ struct process_state {
 	unsigned sub_num;
 	char sub_begin[TIMELEN];
 	char sub_end[TIMELEN];
+	int sp;
 };
 
 int identify_tag(const char *name)
@@ -53,6 +54,7 @@ void start_p_handler(process_state *st, const char **atts)
 		return;
 	st->sub_init = 1;
 	st->sub_num++;
+	st->sp = 1;
 
 	// TODO: Check that times and durations are in fact valid
 
@@ -107,6 +109,7 @@ void start_element_handler(void *udata, const char *name, const char **atts)
 		break;
 	case TAG_BR:
 		fprintf(st->out, "\n");
+		st->sp = 1;
 		break;
 	default:
 		break;
@@ -139,23 +142,37 @@ void text_handler(void *udata, const char *text, int len)
 	char c;
 	int sp;
 
-	// TODO: Shave off any excess whitespace from XML
-
 	st = udata;
 
 	if(!st->sub_init)
 		return;
 
+
 	for(i = 0; i < len; i++) {
+
 		c = text[i];
+
 		switch(c) {
 		case '\n':
 		case '\t':
 		case '\r':
+			continue;
+		}
+
+		sp = 0;
+
+		switch(c) {
+		case ' ':
+			sp = 1;
+			if(st->sp)
+				break;
+			else
+				fputc(c, st->out);
 			break;
 		default:
 			fputc(c, st->out);
 		}
+		st->sp = sp;
 	}
 	fflush(st->out);
 }

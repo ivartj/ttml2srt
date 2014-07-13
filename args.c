@@ -105,7 +105,7 @@ int args_parse(args_parse_state *state, int argc, char **argv, args_option *opts
 	}
 
 	state->idx++;
-	arg = argv[state->idx];
+	state->arg = argv[state->idx];
 	retval = opt->code;
 
 ret:
