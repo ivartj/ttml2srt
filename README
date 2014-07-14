@@ -1,6 +1,9 @@
 ttml2srt - Timed Text Markup Language to SubRip converter
 
 Description:
+  ttml2srt converts subtitles from the Timed Text Markup Language (TTML)
+  to SubRip (SRT).
+  
   I maintain this in order to obtain subtitles in an
   omxplayer-compatible format from NRK Nett-TV (tv.nrk.no). For now it
   is just a quick hack that has not been extensively tested.
@@ -19,9 +22,8 @@ Options:
   -o, --output=FILENAME  Specifies output file
 
 TODO:
+- Add option for output character encoding.
+  mplayer presumes WINDOWS-1252 unless given -utf8 option,
+  omxplayer takes only UTF-8.
+- grep TODO *.c *.h
 
- * Add option for output character encoding.
-   mplayer presumes WINDOWS-1252 unless given -utf8 option,
-   omxplayer takes only UTF-8.
-
- * grep TODO *.c *.h
