@@ -45,7 +45,7 @@ const char *get_attr(const char **atts, const char *name)
 
 void start_p_handler(process_state *st, const char **atts)
 {
-	struct tm begintime, endtime;
+	struct tm begintime = { 0 }, endtime = { 0 };
 	const char *begin, *end, *dur, *rest;
 	unsigned ms, ms_begin, len;
 
