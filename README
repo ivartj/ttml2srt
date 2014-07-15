@@ -14,7 +14,7 @@ Installation:
   make all install clean
 
 Usage:
-  ttml2srt [-o OUTPUT] [INPUT]
+  ttml2srt [-o OUTPUT] [INPUT [OUTPUT]]
 
 Options:
   -h, --help             Prints help message
