@@ -1,4 +1,3 @@
-#define _XOPEN_SOURCE 500
 #include "process.h"
 #include <expat.h>
 #include <time.h>
