@@ -14,8 +14,11 @@ FILE *output = NULL;
 
 void usage(FILE *out, args_option *opts)
 {
-	fprintf(out, "Usage: %s [-o OUTPUT] [INPUT]\n", main_name);
-	fprintf(out, "Convert TTML files to SRT files.\n");
+	fprintf(out, "Usage:\n");
+	fprintf(out, "  %s [-o OUTPUT] [INPUT [OUTPUT]]\n", main_name);
+	fprintf(out, "\n");
+	fprintf(out, "Description:\n");
+	fprintf(out, "  Convert TTML files to SRT files.\n");
 	fprintf(out, "\n");
 	fprintf(out, "Options:\n");
 	args_usage(opts, out);
@@ -31,6 +34,10 @@ void parseargs(int argc, char *argv[])
 		{ 0 },
 	};
 	int c;
+	struct {
+		int output;
+		int input;
+	} set = { 0 };
 
 	while((c = args_parse(&st, argc, argv, opts)) != -1)
 	switch(c) {
@@ -41,10 +48,24 @@ void parseargs(int argc, char *argv[])
 		printf("%s version %s\n", PACKAGE_NAME, PACKAGE_VERSION);
 		exit(EXIT_SUCCESS);
 	case 'o':
+		if(set.output) {
+			fprintf(stderr, "Output specified twice.\n");
+			exit(EXIT_FAILURE);
+		}
 		output_filename = st.arg;
+		set.output = 1;
 		break;
 	case '_':
+		if(set.input && !(set.output)) {
+			output_filename = st.arg;
+			set.output = 1;
+			break;
+		} else if(set.output) {
+			fprintf(stderr, "Output specified twice.\n");
+			break;
+		}
 		input_filename = st.arg;
+		set.input = 1;
 		break;
 	case ':':
 	case '?':
