@@ -1,8 +1,11 @@
+#define _XOPEN_SOURCE
 #include "process.h"
 #include <expat.h>
 #include <time.h>
 #include <string.h>
+#include <strings.h>
 #include <stdio.h>
+#include <time.h>
 
 #define BUFLEN 1024
 
