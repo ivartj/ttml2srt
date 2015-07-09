@@ -1,0 +1,14 @@
+*.o
+ttml2srt
+configure
+config.status
+config.h
+config.log
+config.h.in
+build-aux/
+stamp-h1
+autom4te.cache/
+Makefile
+Makefile.in
+.deps/
+aclocal.m4
