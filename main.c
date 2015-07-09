@@ -21,25 +21,29 @@ void usage(FILE *out, args_option *opts)
 	fprintf(out, "  Convert TTML files to SRT files.\n");
 	fprintf(out, "\n");
 	fprintf(out, "Options:\n");
-	args_usage(opts, out);
+	args_print_option_usage(out, opts);
+	fprintf(out, "\n");
 }
 
 void parseargs(int argc, char *argv[])
 {
-	args_parse_state st = { 0 };
+	args_context ctx = { 0 };
 	static args_option opts[] = {
-		{ 'h', 'h', "help", NULL, "Prints help message" },
-		{ 301, '-', "version", NULL, "Prints version" },
-		{ 'o', 'o', "output", "FILENAME", "Specifies output file" },
+		{ 'h', "help", NULL, "Prints help message" },
+		{ 301, "version", NULL, "Prints version" },
+		{ 'o', "output", "FILENAME", "Specifies output file" },
 		{ 0 },
 	};
 	int c;
+	char *optarg = NULL;
 	struct {
 		int output;
 		int input;
 	} set = { 0 };
 
-	while((c = args_parse(&st, argc, argv, opts)) != -1)
+	args_set_options(&ctx, opts);
+
+	while((c = args_parse(&ctx, argc, argv, &optarg)) != -1)
 	switch(c) {
 	case 'h':
 		usage(stdout, opts);
@@ -52,19 +56,19 @@ void parseargs(int argc, char *argv[])
 			fprintf(stderr, "Output specified twice.\n");
 			exit(EXIT_FAILURE);
 		}
-		output_filename = st.arg;
+		output_filename = optarg;
 		set.output = 1;
 		break;
 	case '_':
 		if(set.input && !(set.output)) {
-			output_filename = st.arg;
+			output_filename = optarg;
 			set.output = 1;
 			break;
 		} else if(set.output) {
 			fprintf(stderr, "Output specified twice.\n");
 			break;
 		}
-		input_filename = st.arg;
+		input_filename = optarg;
 		set.input = 1;
 		break;
 	case ':':
@@ -99,7 +103,7 @@ void openfiles(void)
 
 int main(int argc, char *argv[])
 {
-	main_name = args_get_cmd(argv[0]);
+	main_name = args_get_command(argv[0]);
 	parseargs(argc, argv);
 	openfiles();
 	process(input, output);
