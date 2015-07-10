@@ -1,5 +1,8 @@
 *.o
+*\~
+tags
 ttml2srt
+ttml2srt.exe
 configure
 config.status
 config.h
