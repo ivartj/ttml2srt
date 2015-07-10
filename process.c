@@ -1,5 +1,6 @@
-#define _XOPEN_SOURCE
+#include "compat.h"
 #include "process.h"
+
 #include <expat.h>
 #include <time.h>
 #include <string.h>

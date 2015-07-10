@@ -1,8 +1,9 @@
+#include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include "config.h"
+#include "compat.h"
 #include "args.h"
 #include "process.h"
 
