@@ -1,5 +1,6 @@
 #define _XOPEN_SOURCE
 #include "ttml2srt.h"
+#include "compat.h"
 #include <expat.h>
 #include <stdarg.h>
 #include <time.h>

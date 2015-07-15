@@ -6,6 +6,12 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC
 AM_PROG_CC_C_O
 
+AC_CHECK_DECLS([strptime, strcasecmp], [], [], [
+[#include <strings.h>
+#include <time.h>]
+])
+AC_CHECK_FUNCS([strptime, strcasecmp])
+
 AC_SUBST([EXPAT_CFLAGS])
 AC_SUBST([EXPAT_LIBS])
 
