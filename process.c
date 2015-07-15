@@ -1,12 +1,15 @@
-#include "compat.h"
-#include "process.h"
-
 #include <expat.h>
 #include <time.h>
 #include <string.h>
-#include <strings.h>
 #include <stdio.h>
 #include <time.h>
+#include "compat.h"
+#include "process.h"
+
+
+#ifdef HAVE_STRCASECMP
+#include <strings.h>
+#endif
 
 #define BUFLEN 1024
 
@@ -27,6 +30,28 @@ struct process_state {
 	char sub_end[TIMELEN];
 	int sp;
 };
+
+/* normalizes only excesses */
+void normalize_time(struct tm *time)
+{
+	if(time->tm_sec > 59) {
+		time->tm_min += time->tm_sec / 60;
+		time->tm_sec %= 60;
+	}
+
+	if(time->tm_min > 59) {
+		time->tm_hour += time->tm_min / 60;
+		time->tm_min %= 60;
+	}
+
+	if(time->tm_hour > 23) {
+		time->tm_mday += time->tm_hour / 24;
+		time->tm_hour %= 24;
+	}
+
+	/* see if the native implementation can do the rest */
+	mktime(time);
+}
 
 int identify_tag(const char *name)
 {
@@ -88,7 +113,7 @@ void start_p_handler(process_state *st, const char **atts)
 		endtime.tm_sec += begintime.tm_sec;
 		endtime.tm_min += begintime.tm_min;
 		endtime.tm_hour += begintime.tm_hour;
-		mktime(&endtime);
+		normalize_time(&endtime);
 		len = strftime(st->sub_end, TIMELEN, "%H:%M:%S,", &endtime);
 		snprintf(st->sub_end + len, TIMELEN - len, "%03u", ms);
 	}
