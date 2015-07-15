@@ -4,7 +4,7 @@
 #include <errno.h>
 #include "config.h"
 #include "args.h"
-#include "process.h"
+#include "ttml2srt.h"
 
 const char *main_name = NULL;
 const char *output_filename = NULL;
@@ -103,9 +103,21 @@ void openfiles(void)
 
 int main(int argc, char *argv[])
 {
+	ttml2srt_context *ctx;
+	int err;
+
 	main_name = args_get_command(argv[0]);
 	parseargs(argc, argv);
 	openfiles();
-	process(input, output);
-	exit(EXIT_SUCCESS);
+
+	ctx = ttml2srt_create_context();
+	ttml2srt_set_input_file(ctx, input);
+	ttml2srt_set_output_file(ctx, output);
+	err = ttml2srt_process(ctx);
+	if(err) {
+		fprintf(stderr, "ttml2srt: %s.\n", ttml2srt_get_error(ctx));
+		exit(1);
+	}
+
+	exit(0);
 }
