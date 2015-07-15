@@ -41,14 +41,6 @@ else()
 endif()
 
 
-check_symbol_exists(getline stdio.h HAVE_GETLINE)
-if(HAVE_GETLINE)
-	set(COMPAT_DEF ${COMPAT_DEF} -DHAVE_GETLINE)
-else()
-	set(COMPAT_SRC ${COMPAT_SRC} getline.c)
-endif()
-
-
 check_c_source_runs(
 	"#include <stdio.h>
 	#include <assert.h>

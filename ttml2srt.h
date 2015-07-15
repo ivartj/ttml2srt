@@ -3,9 +3,10 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#include "compat/compat.h"
 
-typedef ssize_t (*ttml2srt_input_callback)(void *handle, void *buffer, size_t buffer_size);;
-typedef ssize_t (*ttml2srt_output_callback)(void *handle, const void *buffer, size_t buffer_size);;
+typedef ssize_t (*ttml2srt_input_callback)(void *handle, void *buffer, size_t buffer_size);
+typedef ssize_t (*ttml2srt_output_callback)(void *handle, const void *buffer, size_t buffer_size);
 
 typedef struct ttml2srt_context ttml2srt_context;
 

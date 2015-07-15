@@ -3,13 +3,15 @@
 #include <time.h>
 #include <string.h>
 #include <sys/types.h>
-#include <strings.h>
 #include <errno.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <time.h>
 #include "ttml2srt.h"
-#include "compat/compat.h"
+
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 
 /* TIMELEN = strlen("00:00:15,000") + 1 */
 #define TIMELEN 13
@@ -84,6 +86,7 @@ static void xputc(ttml2srt_context *ctx, int c);
 static void xprintf(ttml2srt_context *ctx, const char *fmt, ...);
 static void vxprintf(ttml2srt_context *ctx, const char *fmt, va_list ap);
 static void xerror(ttml2srt_context *ctx, const char *fmt, ...);
+static void normalize_time(struct tm *time);
 
 ttml2srt_context *ttml2srt_create_context(void)
 {
@@ -147,6 +150,7 @@ ssize_t xread(ttml2srt_context *ctx, void *buf, size_t buflen)
 	}
 
 	xerror(ctx, "unrecognized input type");
+	return -1;
 }
 
 ssize_t xwrite(ttml2srt_context *ctx, const void *buf, size_t buflen)
@@ -167,6 +171,7 @@ ssize_t xwrite(ttml2srt_context *ctx, const void *buf, size_t buflen)
 	}
 
 	xerror(ctx, "unrecognized output type");
+	return -1;
 }
 
 void xputc(ttml2srt_context *ctx, int c)
@@ -232,6 +237,29 @@ int identify_tag(const char *name)
 	return 0;
 }
 
+/* normalizes only excesses */
+void normalize_time(struct tm *time)
+{
+	if(time->tm_sec > 59) {
+		time->tm_min += time->tm_sec / 60;
+		time->tm_sec %= 60;
+	}
+
+	if(time->tm_min > 59) {
+		time->tm_hour += time->tm_min / 60;
+		time->tm_min %= 60;
+	}
+
+	if(time->tm_hour > 23) {
+		time->tm_mday += time->tm_hour / 24;
+		time->tm_hour %= 24;
+	}
+
+	/* see if the native implementation can do the rest */
+	mktime(time);
+}
+
+
 const char *get_attr(const char **atts, const char *name)
 {
 	while(atts[0] != NULL) {
@@ -246,7 +274,8 @@ void start_p_handler(ttml2srt_context *ctx, const char **atts)
 {
 	struct tm begintime = { 0 }, endtime = { 0 };
 	const char *begin, *end, *dur, *rest;
-	unsigned ms, ms_begin, len;
+	unsigned ms, ms_begin;
+	size_t len;
 
 	if(ctx->sub_init)
 		return;
@@ -283,7 +312,7 @@ void start_p_handler(ttml2srt_context *ctx, const char **atts)
 		endtime.tm_sec += begintime.tm_sec;
 		endtime.tm_min += begintime.tm_min;
 		endtime.tm_hour += begintime.tm_hour;
-		mktime(&endtime);
+		normalize_time(&endtime);
 		len = strftime(ctx->sub_end, TIMELEN, "%H:%M:%S,", &endtime);
 		snprintf(ctx->sub_end + len, TIMELEN - len, "%03u", ms);
 	}
@@ -377,7 +406,7 @@ int ttml2srt_process(ttml2srt_context *ctx)
 	char buf[1024];
 	size_t readlen;
 	int isfinal;
-	int ok;
+	enum XML_Status ok;
 	enum XML_Error errcode;
 	XML_Parser expat; /* Really no asterisk */
 
@@ -400,7 +429,7 @@ int ttml2srt_process(ttml2srt_context *ctx)
 	for(;;) {
 		readlen = xread(ctx, buf, sizeof(buf));
 		isfinal = readlen != sizeof(buf);
-		ok = XML_Parse(expat, buf, readlen, isfinal);
+		ok = XML_Parse(expat, buf, (int)readlen, isfinal);
 		if(!ok) {
 			errcode = XML_GetErrorCode(expat);
 			xerror(ctx, "XML_Parse:\n%s", XML_ErrorString(errcode));

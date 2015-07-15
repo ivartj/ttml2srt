@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include "compat.h"
 #include "args.h"
 #include "ttml2srt.h"
 

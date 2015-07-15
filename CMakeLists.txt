@@ -20,3 +20,4 @@ target_compile_definitions(ttml2srt
 	PUBLIC _CRT_SECURE_NO_WARNINGS
 	PUBLIC PACKAGE_NAME=\"ttml2srt\" PACKAGE_VERSION=\"0.1\"
 	PUBLIC ${COMPAT_DEF})
+
