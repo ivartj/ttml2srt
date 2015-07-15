@@ -10,6 +10,7 @@ typedef ssize_t (*ttml2srt_output_callback)(void *handle, const void *buffer, si
 typedef struct ttml2srt_context ttml2srt_context;
 
 ttml2srt_context *ttml2srt_create_context(void);
+void ttml2srt_destroy_context(ttml2srt_context *ctx);
 
 void ttml2srt_set_input_file(ttml2srt_context *ctx, FILE *file);
 void ttml2srt_set_input_callback(ttml2srt_context *ctx, ttml2srt_input_callback cb, void *handle);

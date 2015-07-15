@@ -1,4 +1,3 @@
-#include "config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,11 +6,15 @@
 #include "args.h"
 #include "ttml2srt.h"
 
-const char *main_name = NULL;
-const char *output_filename = NULL;
-const char *input_filename = NULL;
-FILE *input = NULL;
-FILE *output = NULL;
+static const char *main_name = NULL;
+static const char *output_filename = NULL;
+static const char *input_filename = NULL;
+static FILE *input = NULL;
+static FILE *output = NULL;
+
+static void usage(FILE *out, args_option *opts);
+static void parseargs(int argc, char *argv[]);
+static void openfiles(void);
 
 void usage(FILE *out, args_option *opts)
 {
@@ -106,19 +109,34 @@ int main(int argc, char *argv[])
 {
 	ttml2srt_context *ctx;
 	int err;
+	int retval = 1;
 
 	main_name = args_get_command(argv[0]);
 	parseargs(argc, argv);
 	openfiles();
 
 	ctx = ttml2srt_create_context();
+	if(ctx == NULL) {
+		fprintf(stderr, "ttml2srt: Failed allocate context.\n");
+		goto cleanup_files;
+	}
+
 	ttml2srt_set_input_file(ctx, input);
 	ttml2srt_set_output_file(ctx, output);
 	err = ttml2srt_process(ctx);
 	if(err) {
-		fprintf(stderr, "ttml2srt: %s.\n", ttml2srt_get_error(ctx));
-		exit(1);
+		fprintf(stderr, "ttml2srt:\n%s.\n", ttml2srt_get_error(ctx));
+		goto cleanup_context;
 	}
 
-	exit(0);
+	retval = 0; /* success */
+
+cleanup_context:
+	ttml2srt_destroy_context(ctx);
+
+cleanup_files:
+	fclose(input);
+	fclose(output);
+
+	exit(retval);
 }

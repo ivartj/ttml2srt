@@ -1,30 +1,6 @@
 #include "compat.h"
+#include <time.h>
 #include <ctype.h>
-
-#ifndef HAVE_STRCASECMP
-
-int strcasecmp(const char *s1, const char *s2)
-{
-	int i;
-	int c1, c2;
-
-	for(i = 0; ; i++) {
-		c1 = tolower(s1[i]);
-		c2 = tolower(s2[i]);
-
-		if(c1 != c2)
-			return c1 - c2;
-
-		if(c1 == '\0')
-			break;
-	}
-
-	return 0;
-}
-
-#endif /* HAVE_STRCASECMP */
-
-#ifndef HAVE_STRPTIME
 
 static const char *p60(const char *str, int *num);
 
@@ -89,27 +65,3 @@ const char *strptime(const char *str, const char *fmt, struct tm *time)
 
 	return str;
 }
-
-#endif /* HAVE_STRPTIME */
-
-
-#ifndef HAVE_SNPRINTF
-
-int vsnprintf(char *buf, size_t buflen, const char *fmt, va_list ap)
-{
-
-}
-
-int snprintf(char *buf, size_t buflen, const char *fmt, ...)
-{
-	va_list ap;
-	int n;
-
-	va_start(ap, fmt);
-	n = vsnprintf(buf, buflen, fmt, ap);
-	va_end(ap);
-
-	return n;
-}
-
-#endif /* HAVE SNPRINTF */

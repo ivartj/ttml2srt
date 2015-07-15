@@ -1,6 +1,3 @@
-#define _XOPEN_SOURCE
-#include "ttml2srt.h"
-#include "compat.h"
 #include <expat.h>
 #include <stdarg.h>
 #include <time.h>
@@ -11,6 +8,8 @@
 #include <setjmp.h>
 #include <stdio.h>
 #include <time.h>
+#include "ttml2srt.h"
+#include "compat/compat.h"
 
 /* TIMELEN = strlen("00:00:15,000") + 1 */
 #define TIMELEN 13
@@ -95,6 +94,11 @@ ttml2srt_context *ttml2srt_create_context(void)
 	return ctx;
 }
 
+void ttml2srt_destroy_context(ttml2srt_context *ctx)
+{
+	free(ctx);
+}
+
 void ttml2srt_set_input_file(ttml2srt_context *ctx, FILE *file)
 {
 	memset(&(ctx->in), 0, sizeof(input));
@@ -112,14 +116,14 @@ void ttml2srt_set_input_callback(ttml2srt_context *ctx, ttml2srt_input_callback 
 
 void ttml2srt_set_output_file(ttml2srt_context *ctx, FILE *file)
 {
-	memset(&(ctx->in), 0, sizeof(output));
-	ctx->in.type = INPUT_TYPE_FILE;
-	ctx->in.file.file = file;
+	memset(&(ctx->out), 0, sizeof(output));
+	ctx->out.type = INPUT_TYPE_FILE;
+	ctx->out.file.file = file;
 }
 
 void ttml2srt_set_output_callback(ttml2srt_context *ctx, ttml2srt_output_callback cb, void *handle)
 {
-	memset(&(ctx->in), 0, sizeof(output));
+	memset(&(ctx->out), 0, sizeof(output));
 	ctx->out.type = INPUT_TYPE_CALLBACK;
 	ctx->out.callback.callback = cb;
 	ctx->out.callback.handle = handle;
@@ -133,14 +137,16 @@ ssize_t xread(ttml2srt_context *ctx, void *buf, size_t buflen)
 	case INPUT_TYPE_FILE:
 		n = fread(buf, 1, buflen, ctx->in.file.file);
 		if(n == -1)
-			xerror(ctx, "fread: %s", strerror(errno));
+			xerror(ctx, "fread:\n%s", strerror(errno));
 		return n;
 	case INPUT_TYPE_CALLBACK:
 		n = ctx->in.callback.callback(ctx->in.callback.handle, buf, buflen);
 		if(n == -1)
-			xerror(ctx, "input callback: %s", strerror(errno));
+			xerror(ctx, "input callback:\n%s", strerror(errno));
 		return n;
 	}
+
+	xerror(ctx, "unrecognized input type");
 }
 
 ssize_t xwrite(ttml2srt_context *ctx, const void *buf, size_t buflen)
@@ -151,18 +157,21 @@ ssize_t xwrite(ttml2srt_context *ctx, const void *buf, size_t buflen)
 	case OUTPUT_TYPE_FILE:
 		n = fwrite(buf, 1, buflen, ctx->out.file.file);
 		if(n == -1)
-			xerror(ctx, "fwrite: %s", strerror(errno));
+			xerror(ctx, "fwrite:\n%s", strerror(errno));
 		return n;
 	case OUTPUT_TYPE_CALLBACK:
 		n = ctx->out.callback.callback(ctx->out.callback.handle, buf, buflen);
 		if(n == -1)
-			xerror(ctx, "output callback: %s", strerror(errno));
+			xerror(ctx, "output callback:\n%s", strerror(errno));
 		return n;
 	}
+
+	xerror(ctx, "unrecognized output type");
 }
 
 void xputc(ttml2srt_context *ctx, int c)
 {
+
 	unsigned char byte;
 
 	byte = c;
@@ -179,13 +188,13 @@ void vxprintf(ttml2srt_context *ctx, const char *fmt, va_list ap)
 	if(ctx->out.type == OUTPUT_TYPE_FILE) {
 		n = vfprintf(ctx->out.file.file, fmt, ap);
 		if(n < 0)
-			xerror(ctx, "vfprintf: %s", strerror(errno));
+			xerror(ctx, "vfprintf:\n%s", strerror(errno));
 		return;
 	}
 
 	n = vsnprintf(buf, sizeof(buf), fmt, ap);
 	if(n < 0)
-		xerror(ctx, "vfprintf: %s", strerror(errno));
+		xerror(ctx, "vfprintf:\n%s", strerror(errno));
 
 	xwrite(ctx, buf, n);
 }
@@ -203,7 +212,6 @@ void xerror(ttml2srt_context *ctx, const char *fmt, ...)
 {
 	va_list ap;
 
-	puts(".");
 	va_start(ap, fmt);
 	vsnprintf(ctx->errmsg, sizeof(ctx->errmsg), fmt, ap);
 	va_end(ap);
@@ -384,10 +392,10 @@ int ttml2srt_process(ttml2srt_context *ctx)
 	);
 	XML_SetUserData(expat, ctx);
 
-	xprintf(ctx, "\xef\xbb\xbf"); /* Byte Order Mark */
-
 	if(setjmp(ctx->escape))
 		return -1;
+
+	xprintf(ctx, "\xef\xbb\xbf"); /* Byte Order Mark */
 
 	for(;;) {
 		readlen = xread(ctx, buf, sizeof(buf));
@@ -395,7 +403,7 @@ int ttml2srt_process(ttml2srt_context *ctx)
 		ok = XML_Parse(expat, buf, readlen, isfinal);
 		if(!ok) {
 			errcode = XML_GetErrorCode(expat);
-			xerror(ctx, "XML_Parse: %s.\n", XML_ErrorString(errcode));
+			xerror(ctx, "XML_Parse:\n%s", XML_ErrorString(errcode));
 		}
 		if(isfinal)
 			break;
