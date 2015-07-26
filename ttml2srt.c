@@ -199,7 +199,7 @@ void vxprintf(ttml2srt_context *ctx, const char *fmt, va_list ap)
 
 	n = vsnprintf(buf, sizeof(buf), fmt, ap);
 	if(n < 0)
-		xerror(ctx, "vfprintf:\n%s", strerror(errno));
+		xerror(ctx, "vsnprintf:\n%s", strerror(errno));
 
 	xwrite(ctx, buf, n);
 }
