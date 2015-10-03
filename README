@@ -9,9 +9,17 @@ Description:
   is just a quick hack that has not been extensively tested.
 
 Installation:
-  autoreconf --install
-  ./configure --prefix=$HOME/.local
-  make all install clean
+  ttml2srt is built using the CMake build system.
+
+  Example installation to $HOME/.local:
+
+    $ mkdir build
+    $ cd build
+    $ cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local
+    $ make all install clean
+
+  Building with the Windows SDK also works. Use the cmake -G option to override
+  the default build generator.
 
 Usage:
   ttml2srt [-o OUTPUT] [INPUT [OUTPUT]]

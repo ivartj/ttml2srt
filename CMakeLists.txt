@@ -21,3 +21,8 @@ target_compile_definitions(ttml2srt
 	PUBLIC PACKAGE_NAME=\"ttml2srt\" PACKAGE_VERSION=\"0.1\"
 	PUBLIC ${COMPAT_DEF})
 
+install(
+	TARGETS ttml2srt
+	DESTINATION bin
+)
+
