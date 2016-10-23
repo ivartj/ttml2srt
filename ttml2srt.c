@@ -409,6 +409,7 @@ int ttml2srt_process(ttml2srt_context *ctx)
 	enum XML_Status ok;
 	enum XML_Error errcode;
 	XML_Parser expat; /* Really no asterisk */
+	int retval;
 
 	expat = XML_ParserCreate(NULL);
 	XML_SetElementHandler(
@@ -421,8 +422,11 @@ int ttml2srt_process(ttml2srt_context *ctx)
 	);
 	XML_SetUserData(expat, ctx);
 
-	if(setjmp(ctx->escape))
-		return -1;
+	retval = 0;
+	if(setjmp(ctx->escape)) {
+		retval = -1;
+		goto cleanup;
+	}
 
 	xprintf(ctx, "\xef\xbb\xbf"); /* Byte Order Mark */
 
@@ -438,7 +442,9 @@ int ttml2srt_process(ttml2srt_context *ctx)
 			break;
 	}
 
+cleanup:
 	XML_ParserFree(expat);
 
-	return 0;
+	return retval;
 }
+
