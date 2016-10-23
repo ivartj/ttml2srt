@@ -230,9 +230,11 @@ const char *ttml2srt_get_error(ttml2srt_context *ctx)
 
 int identify_tag(const char *name)
 {
-	if(!strcasecmp(name, "p"))
+	if(!strcasecmp(name, "p")
+	|| !strcasecmp(name, "http://www.w3.org/ns/ttml:p"))
 		return TAG_P;
-	if(!strcasecmp(name, "br"))
+	if(!strcasecmp(name, "br")
+	|| !strcasecmp(name, "http://www.w3.org/ns/ttml:br"))
 		return TAG_BR;
 	return 0;
 }
@@ -411,7 +413,7 @@ int ttml2srt_process(ttml2srt_context *ctx)
 	XML_Parser expat; /* Really no asterisk */
 	int retval;
 
-	expat = XML_ParserCreate(NULL);
+	expat = XML_ParserCreateNS(NULL, ':');
 	XML_SetElementHandler(
 		expat,
 		(XML_StartElementHandler)start_element_handler,
